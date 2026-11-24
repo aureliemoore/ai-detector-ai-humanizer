@@ -1,4 +1,25 @@
-# WriterPro Text
+# AI Detector & AI Humanizer — WriterPro
+
+**检测 AI 率 · 降 AI 率 · AIGC 检测 · 文章去 AI 味**
+
+A lightweight, self-hosted **AI text detector and AI humanizer interface**, powered by the WriterPro API. Paste Chinese or English text to check an AI-generated text score, then use prepaid API credit to improve clarity and make the wording more natural.
+
+- **AI detection:** 6 free requests per API account per day, shared across its API keys and deployments.
+- **Text rewriting / AI humanizer:** review a quote before using your prepaid API balance.
+- **Server-side API key:** keep your own key in `.env`; it is never sent to the browser.
+- **Simple setup:** Node.js 22.11+; no third-party runtime npm dependencies.
+
+AI detection is a model estimate, not proof of authorship. Neither 100% detection accuracy nor a specific AI score after rewriting is guaranteed.
+
+## Quick start (English)
+
+1. Create your own API key in the [WriterPro API Console](https://writerpro.cn/open-platform.html).
+2. Download this repository, copy `.env.example` to `.env`, and set `WRITERPRO_API_KEY` on your server.
+3. Run `npm start` and open [http://127.0.0.1:3080](http://127.0.0.1:3080). No `npm install` is needed.
+
+One deployment uses one API account. All visitors share that account's free quota and balance. Internet-facing deployments require an access password and HTTPS; see the Chinese deployment guide below. This project requires a Node server and cannot run as a static GitHub Pages site.
+
+## 中文说明：检测 AI 率与降 AI 率
 
 一个小而完整的文本工具：**粘贴正文 → 免费检测 AI 特征 → 确认费用 → 使用 API 余额优化表达（文章去 AI 味 / 降 AI）**。
 
@@ -14,7 +35,7 @@ _截图使用独立测试账户与合成文章；实际额度、余额和结果�
 
 1. 在 [WriterPro API 控制台](https://writerpro.cn/open-platform.html)注册或登录自己的 API 账户，创建 API Key。需要优化文本时，给 **API 余额**充值。
 2. 下载并解压项目，在项目目录将 `.env.example` 复制为 `.env`，填写 `WRITERPRO_API_KEY`。
-3. 运行 `npm start`，打开 **http://127.0.0.1:3080**。
+3. 运行 `npm start`，打开 [http://127.0.0.1:3080](http://127.0.0.1:3080)。
 
 ```sh
 cp .env.example .env
@@ -90,7 +111,7 @@ location / {
 ## 项目结构
 
 ```text
-writerpro-text-starter/
+ai-detector-ai-humanizer/
   public/          页面、样式、交互和 SVG 图标
   server.js        密钥保护、访问密码、同源校验、接口白名单
   test/            自动化测试（本地合成接口，不消耗真实额度）

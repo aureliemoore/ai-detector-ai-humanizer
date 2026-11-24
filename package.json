@@ -1,8 +1,8 @@
 {
-  "name": "writerpro-text-starter",
+  "name": "ai-detector-ai-humanizer",
   "version": "1.0.0",
   "private": true,
-  "description": "A small, self-hosted text interface for WriterPro API: AIGC detection and prepaid text optimization.",
+  "description": "AI text detector and AI humanizer interface for WriterPro API. 检测AI率、降AI率、AIGC检测与文章去AI味。",
   "type": "module",
   "engines": {
     "node": ">=22.11.0"
