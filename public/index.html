@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="轻量、可自托管的 WriterPro 文本工具。粘贴正文，查看 AIGC 检测结果，使用 API 余额优化表达。"
+    />
+    <title>WriterPro Text · 文本检测与优化</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="WriterPro Text 首页"
+        ><span class="brand-icon" aria-hidden="true">W</span> WriterPro
+        <span class="brand-light">Text</span></a
+      >
+      <nav aria-label="导航">
+        <a
+          href="https://writerpro.cn/open-platform.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          >API 控制台 <span aria-hidden="true">↗</span></a
+        ><button id="logout" class="text-button" hidden>退出</button>
+      </nav>
+    </header>
+    <main>
+      <section class="intro">
+        <div class="eyebrow">
+          <span class="status-dot"></span> SMALL TOOL. CLEARER WORDS.
+        </div>
+        <h1>让每一次表达，<span>更清晰。</span></h1>
+        <p>粘贴文本，了解 AI 特征；保留你的观点，让表达更自然。</p>
+      </section>
+      <section id="setup" class="notice" hidden>
+        <strong>还差一步：配置 API Key</strong>
+        <p>
+          在服务端 <code>.env</code> 中填写自己的
+          <code>WRITERPRO_API_KEY</code
+          >，重启项目即可使用。不要将密钥填入网页或上传 GitHub。
+        </p>
+        <a
+          href="https://writerpro.cn/open-platform.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          >前往 API 控制台获取密钥 ↗</a
+        >
+      </section>
+      <section id="login-panel" class="login-card" hidden>
+        <div class="eyebrow">PRIVATE WORKSPACE</div>
+        <h2>进入文本工作台</h2>
+        <p>此站点使用部署者的 API 账户。请输入部署者设置的访问密码。</p>
+        <form id="login-form">
+          <label for="password">访问密码</label
+          ><input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            maxlength="200"
+          /><button class="primary" type="submit">
+            进入工作台 <span aria-hidden="true">→</span>
+          </button>
+        </form>
+      </section>
+      <div id="workspace" hidden>
+        <section class="account-strip" aria-label="API 账户权益">
+          <div>
+            <span class="small-label">今日免费检测</span
+            ><strong><span id="remaining">—</span><small> / 6 次</small></strong
+            ><span id="quota-detail" class="caption"
+              >同一 API 账户共享 · 每日 00:00 重置</span
+            >
+          </div>
+          <div>
+            <span class="small-label">API 可用余额</span
+            ><strong id="balance">—</strong
+            ><a
+              class="caption"
+              href="https://writerpro.cn/open-platform.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              >充值与账单 ↗</a
+            >
+          </div>
+          <div class="account-note">
+            <span class="mini-icon" aria-hidden="true">↗</span
+            ><strong>轻量输入，清楚计费</strong
+            ><span class="caption"
+              >检测免费 · 优化先报价<br />费用从部署者的 API 余额扣除</span
+            >
+          </div>
+        </section>
+        <div class="editor-grid">
+          <section class="panel input-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="step">01</span>
+                <h2>你的正文</h2>
+              </div>
+              <button id="clear" class="text-button">清空</button>
+            </div>
+            <label class="sr-only" for="text">输入需要检测或优化的正文</label
+            ><textarea
+              id="text"
+              maxlength="5000"
+              spellcheck="false"
+              placeholder="在这里粘贴正文。&#10;&#10;支持中文与英文，单次 50–5000 字符。建议输入完整段落，避免只提交标题或关键词。"
+            ></textarea>
+            <div class="editor-bottom">
+              <span>纯文本 · 不上传文件</span
+              ><span><b id="count">0</b> / 5,000 字符</span>
+            </div>
+            <div class="actions">
+              <button id="detect" class="primary">
+                免费检测 AI 特征 <span aria-hidden="true">↗</span></button
+              ><button id="rewrite" class="secondary">
+                优化表达 <span class="tag">余额支付</span>
+              </button>
+            </div>
+            <p class="fine-print">
+              提交即使用 WriterPro
+              云端处理。正文在任务完成后从本工具接口清除，结果加密暂存 60
+              分钟，可手动提前清除。请勿提交无权处理的内容。
+            </p>
+          </section>
+          <section class="panel result-panel" aria-labelledby="result-heading">
+            <div class="panel-heading">
+              <div>
+                <span class="step">02</span>
+                <h2 id="result-heading">结果工作区</h2>
+              </div>
+              <span id="result-badge" class="badge">准备就绪</span>
+            </div>
+            <div id="empty-result" class="empty-result">
+              <div class="illustration" aria-hidden="true">
+                <span></span><i></i><b>✦</b>
+              </div>
+              <h3>从一段文字开始</h3>
+              <p>
+                检测 AI 特征，或在确认费用后优化表达。<br />结果会显示在这里。
+              </p>
+              <div class="empty-tags">
+                <span>每日 6 次免费检测</span><span>API 余额付费优化</span>
+              </div>
+            </div>
+            <div id="progress" class="progress" hidden>
+              <span class="spinner" aria-hidden="true"></span>
+              <h3 id="progress-title">正在提交</h3>
+              <p id="progress-detail">请稍候，重复查询不会再次扣费。</p>
+              <code id="request-id"></code
+              ><button id="recover" class="secondary" hidden>查询原任务</button
+              ><button id="retry-original" class="secondary" hidden>
+                按原编号重试提交
+              </button>
+            </div>
+            <div id="detection-result" class="detection-result" hidden>
+              <span class="small-label">AI 生成可能性评分</span>
+              <div id="score" class="score">—</div>
+              <div class="score-track"><span id="score-fill"></span></div>
+              <p>
+                这是模型对文本特征的判断，可能存在误差，不等同于抄袭率，也不能单独证明作者身份。
+              </p>
+              <dl>
+                <div>
+                  <dt>检测模型</dt>
+                  <dd id="model">—</dd>
+                </div>
+                <div>
+                  <dt>检测时间</dt>
+                  <dd id="detected-at">—</dd>
+                </div>
+              </dl>
+            </div>
+            <div id="rewrite-result" class="rewrite-result" hidden>
+              <p class="result-intro">
+                已完成表达优化，请核对事实、引用与原意。
+              </p>
+              <label class="sr-only" for="output">优化后的正文</label
+              ><textarea id="output" readonly></textarea>
+              <div class="result-tools">
+                <span id="charged"></span
+                ><button id="copy" class="secondary">复制文本</button
+                ><button id="download" class="text-button">下载 TXT</button>
+              </div>
+            </div>
+            <div id="result-footer" class="result-footer" hidden>
+              <span id="expiry"></span
+              ><button id="erase" class="text-button">清除云端结果</button>
+            </div>
+          </section>
+        </div>
+        <section class="how-it-works">
+          <div>
+            <span>01 / 了解文本</span>
+            <p>免费额度属于 API 账户，多把 Key、多个部署共享每天 6 次。</p>
+          </div>
+          <div>
+            <span>02 / 自主决定</span>
+            <p>优化按实际账户价格报价，确认后扣费，处理失败自动退回。</p>
+          </div>
+          <div>
+            <span>03 / 掌握结果</span>
+            <p>
+              一键复制或下载文本。检测结果仅供参考，优化不承诺特定 AI 评分。
+            </p>
+          </div>
+        </section>
+      </div>
+      <div
+        id="message"
+        class="message"
+        role="status"
+        aria-live="polite"
+        hidden
+      ></div>
+    </main>
+    <footer>
+      <span>WriterPro Text <span class="footer-dot">·</span> 轻量文本工具</span
+      ><a href="https://writerpro.cn" target="_blank" rel="noopener noreferrer"
+        >了解 WriterPro ↗</a
+      >
+    </footer>
+    <dialog id="quote-dialog" aria-labelledby="quote-title">
+      <form method="dialog">
+        <button class="close" aria-label="关闭费用确认">×</button>
+      </form>
+      <div class="eyebrow">REVIEW BEFORE YOU PAY</div>
+      <h2 id="quote-title">确认本次优化</h2>
+      <p>从当前 API 账户的已充值余额支付。</p>
+      <label for="target">优化方向</label
+      ><select id="target">
+        <option value="维普">维普 / 格子达方向</option>
+        <option value="知网">知网方向</option>
+      </select>
+      <div class="quote-total">
+        <span>本次费用</span><strong id="quote-price">—</strong>
+      </div>
+      <p id="quote-detail" class="caption"></p>
+      <p id="quote-balance" class="caption"></p>
+      <p class="fine-print">
+        中文按计费字符、英文按单词，每 1000 单位向上取整。价格与折扣由 API
+        账户决定。处理失败自动退回，不保证达到特定检测分数。
+      </p>
+      <button id="confirm-rewrite" class="primary">确认支付并优化</button
+      ><a
+        id="quote-recharge"
+        href="https://writerpro.cn/open-platform.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        hidden
+        >余额不足，前往 API 控制台充值 ↗</a
+      >
+    </dialog>
+  </body>
+</html>
